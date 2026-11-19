@@ -28,4 +28,9 @@ public class GlobalExceptionHandler {
                 : ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
         return ResponseEntity.badRequest().body(Map.of("error", mensaje));
     }
+
+    @ExceptionHandler(AccionNoPermitidaException.class)
+    public ResponseEntity<Map<String, String>> accionNoPermitida(AccionNoPermitidaException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", ex.getMessage()));
+    }
 }

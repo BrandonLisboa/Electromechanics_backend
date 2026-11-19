@@ -4,8 +4,10 @@ import com.electromechanics.usuario_service.dto.LoginRequest;
 import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
+import com.electromechanics.usuario_service.exception.AccionNoPermitidaException;
 import com.electromechanics.usuario_service.exception.CredencialesInvalidasException;
 import com.electromechanics.usuario_service.exception.RutRegistradoException;
+import com.electromechanics.usuario_service.model.Rol;
 import com.electromechanics.usuario_service.model.Usuario;
 import com.electromechanics.usuario_service.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -77,4 +79,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioResponse toResponse(Usuario u) {
         return new UsuarioResponse(u.getId(), u.getRut(), u.getNombre(), u.getCorreo(), u.getRol().name());
     }
+
+    @Override
+    public Optional<UsuarioResponse> cambiarRol(UUID idObjetivo, Rol nuevoRol, UUID idSolicitante) {
+    if (idObjetivo.equals(idSolicitante)) {
+        throw new AccionNoPermitidaException("No puedes cambiar tu propio rol");
+    }
+
+    return usuarioRepository.findById(idObjetivo).map(usuario -> {
+        usuario.setRol(nuevoRol);
+        return toResponse(usuarioRepository.save(usuario));
+    });
+}
 }

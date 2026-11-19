@@ -4,6 +4,7 @@ import com.electromechanics.usuario_service.dto.LoginRequest;
 import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
+import com.electromechanics.usuario_service.exception.AccionNoPermitidaException;
 import com.electromechanics.usuario_service.exception.CredencialesInvalidasException;
 import com.electromechanics.usuario_service.exception.RutRegistradoException;
 import com.electromechanics.usuario_service.model.Rol;
@@ -114,5 +115,42 @@ class UsuarioServiceImplTest {
         assertThatThrownBy(() -> usuarioService.login(
                 new LoginRequest("99999999-9", "clave123")))
                 .isInstanceOf(CredencialesInvalidasException.class);
+    }
+
+    @Test
+    void cambiarRolActualizaElRol() {
+        UUID idTrabajador = UUID.randomUUID();
+        Usuario trabajador = new Usuario("11111111-1", "hash");
+        trabajador.setId(idTrabajador);
+
+        when(usuarioRepository.findById(idTrabajador)).thenReturn(Optional.of(trabajador));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Optional<UsuarioResponse> respuesta =
+                usuarioService.cambiarRol(idTrabajador, Rol.SUPERVISOR, UUID.randomUUID());
+
+        assertThat(respuesta).isPresent();
+        assertThat(respuesta.get().rol()).isEqualTo("SUPERVISOR");
+    }
+
+    @Test
+    void cambiarRolDeUsuarioInexistenteDevuelveVacio() {
+        UUID idInexistente = UUID.randomUUID();
+        when(usuarioRepository.findById(idInexistente)).thenReturn(Optional.empty());
+
+        Optional<UsuarioResponse> respuesta =
+                usuarioService.cambiarRol(idInexistente, Rol.SUPERVISOR, UUID.randomUUID());
+
+        assertThat(respuesta).isEmpty();
+    }
+
+    @Test
+    void supervisorNoPuedeCambiarseASiMismo() {
+        UUID id = UUID.randomUUID();
+
+        assertThatThrownBy(() -> usuarioService.cambiarRol(id, Rol.TRABAJADOR, id))
+                .isInstanceOf(AccionNoPermitidaException.class);
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 }

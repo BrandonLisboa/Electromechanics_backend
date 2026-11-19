@@ -1,5 +1,6 @@
 package com.electromechanics.usuario_service.controller;
 
+import com.electromechanics.usuario_service.dto.CambiarRolRequest;
 import com.electromechanics.usuario_service.dto.LoginRequest;
 import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,4 +62,15 @@ public class UsuarioController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(usuarioService.login(request));
     }
+
+    @PatchMapping("/{id}/rol")
+    public ResponseEntity<UsuarioResponse> cambiarRol(@PathVariable UUID id,
+                                                  @Valid @RequestBody CambiarRolRequest request,
+                                                  Authentication auth) {
+    UUID solicitante = UUID.fromString(auth.getName());
+
+    return usuarioService.cambiarRol(id, request.rol(), solicitante)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
+}
 }

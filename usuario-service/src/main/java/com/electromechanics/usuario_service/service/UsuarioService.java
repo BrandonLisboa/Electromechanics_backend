@@ -4,6 +4,7 @@ import com.electromechanics.usuario_service.dto.LoginRequest;
 import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
+import com.electromechanics.usuario_service.model.Rol;
 import com.electromechanics.usuario_service.model.Usuario;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface UsuarioService {
     UsuarioResponse registrar(RegistroRequest request);
 
     LoginResponse login(LoginRequest request);
+
+    Optional<UsuarioResponse> cambiarRol(UUID idObjetivo, Rol nuevoRol, UUID idSolicitante);
 }
