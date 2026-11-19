@@ -1,6 +1,7 @@
 package com.electromechanics.usuario_service.service;
 
 import com.electromechanics.usuario_service.dto.LoginRequest;
+import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
 import com.electromechanics.usuario_service.exception.CredencialesInvalidasException;
@@ -19,10 +20,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
+                            PasswordEncoder passwordEncoder,
+                            JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -53,7 +58,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         String rut = request.rut().trim();
         String password = request.password().trim();
 
@@ -64,7 +69,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new CredencialesInvalidasException();
         }
 
-        return toResponse(usuario);
+        return new LoginResponse(
+                jwtService.generarToken(usuario),
+                toResponse(usuario));
     }
 
     private UsuarioResponse toResponse(Usuario u) {

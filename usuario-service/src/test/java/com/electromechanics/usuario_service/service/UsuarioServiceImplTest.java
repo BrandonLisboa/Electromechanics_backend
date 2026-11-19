@@ -1,10 +1,12 @@
 package com.electromechanics.usuario_service.service;
 
 import com.electromechanics.usuario_service.dto.LoginRequest;
+import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
 import com.electromechanics.usuario_service.exception.CredencialesInvalidasException;
 import com.electromechanics.usuario_service.exception.RutRegistradoException;
+import com.electromechanics.usuario_service.model.Rol;
 import com.electromechanics.usuario_service.model.Usuario;
 import com.electromechanics.usuario_service.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,16 +31,21 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceImplTest {
 
+    private static final String CLAVE_JWT = "clave-de-prueba-de-al-menos-32-caracteres-123";
+    private static final long UNA_HORA_MS = 3_600_000L;
+
     @Mock
     private UsuarioRepository usuarioRepository;
 
     private PasswordEncoder passwordEncoder;
+    private JwtService jwtService;
     private UsuarioServiceImpl usuarioService;
 
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
-        usuarioService = new UsuarioServiceImpl(usuarioRepository, passwordEncoder);
+        jwtService = new JwtService(CLAVE_JWT, UNA_HORA_MS);
+        usuarioService = new UsuarioServiceImpl(usuarioRepository, passwordEncoder, jwtService);
     }
 
     @Test
@@ -77,20 +84,21 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void loginConCredencialesCorrectasDevuelveUsuario() {
+    void loginConCredencialesCorrectasDevuelveTokenYUsuario() {
         Usuario existente = new Usuario("11111111-1", passwordEncoder.encode("clave123"));
         existente.setId(UUID.randomUUID());
         when(usuarioRepository.findByRut("11111111-1")).thenReturn(Optional.of(existente));
 
-        UsuarioResponse respuesta = usuarioService.login(
+        LoginResponse respuesta = usuarioService.login(
                 new LoginRequest("11111111-1", "clave123"));
 
-        assertThat(respuesta.id()).isEqualTo(existente.getId());
-        assertThat(respuesta.rut()).isEqualTo("11111111-1");
+        assertThat(respuesta.token()).isNotBlank();
+        assertThat(respuesta.usuario().id()).isEqualTo(existente.getId());
+        assertThat(respuesta.usuario().rut()).isEqualTo("11111111-1");
     }
 
     @Test
-    void loginConContrasenaIncorrectaLanzaExcepcion() {
+    void loginConContrasenaIncorrecta() {
         Usuario existente = new Usuario("11111111-1", passwordEncoder.encode("clave123"));
         when(usuarioRepository.findByRut("11111111-1")).thenReturn(Optional.of(existente));
 
@@ -100,7 +108,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void loginConRutInexistenteLanzaExcepcion() {
+    void loginConRutInexistente() {
         when(usuarioRepository.findByRut("99999999-9")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> usuarioService.login(

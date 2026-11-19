@@ -1,6 +1,7 @@
 package com.electromechanics.usuario_service.service;
 
 import com.electromechanics.usuario_service.dto.LoginRequest;
+import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
 import com.electromechanics.usuario_service.model.Usuario;
@@ -19,5 +20,5 @@ public interface UsuarioService {
 
     UsuarioResponse registrar(RegistroRequest request);
 
-    UsuarioResponse login(LoginRequest request);
+    LoginResponse login(LoginRequest request);
 }

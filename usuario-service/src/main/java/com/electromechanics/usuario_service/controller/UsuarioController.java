@@ -1,6 +1,7 @@
 package com.electromechanics.usuario_service.controller;
 
 import com.electromechanics.usuario_service.dto.LoginRequest;
+import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
 import com.electromechanics.usuario_service.model.Usuario;
@@ -56,7 +57,7 @@ public class UsuarioController {
 
     @Operation(summary = "Iniciar sesión con rut y contraseña")
     @PostMapping("/login")
-    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(usuarioService.login(request));
     }
 }

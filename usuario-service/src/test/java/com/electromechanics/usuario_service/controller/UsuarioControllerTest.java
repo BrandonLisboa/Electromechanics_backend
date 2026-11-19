@@ -1,6 +1,7 @@
 package com.electromechanics.usuario_service.controller;
 
 import com.electromechanics.usuario_service.dto.LoginRequest;
+import com.electromechanics.usuario_service.dto.LoginResponse;
 import com.electromechanics.usuario_service.dto.RegistroRequest;
 import com.electromechanics.usuario_service.dto.UsuarioResponse;
 import com.electromechanics.usuario_service.exception.CredencialesInvalidasException;
@@ -61,10 +62,12 @@ class UsuarioControllerTest {
     @Test
     void loginCorrectoDevuelve200() {
         UUID id = UUID.randomUUID();
-        UsuarioResponse esperado = new UsuarioResponse(id, "11111111-1", null, null, "EMPLEADO");
+        LoginResponse esperado = new LoginResponse(
+                "token-de-prueba",
+                new UsuarioResponse(id, "11111111-1", null, null, "TRABAJADOR"));
         when(usuarioService.login(any(LoginRequest.class))).thenReturn(esperado);
 
-        ResponseEntity<UsuarioResponse> respuesta =
+        ResponseEntity<LoginResponse> respuesta =
                 usuarioController.login(new LoginRequest("11111111-1", "clave123"));
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
