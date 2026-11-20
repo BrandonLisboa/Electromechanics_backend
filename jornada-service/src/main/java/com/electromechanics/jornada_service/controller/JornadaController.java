@@ -3,12 +3,13 @@ package com.electromechanics.jornada_service.controller;
 import com.electromechanics.jornada_service.model.Jornada;
 import com.electromechanics.jornada_service.service.JornadaService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/jornadas")
@@ -20,9 +21,10 @@ public class JornadaController {
         this.jornadaService = jornadaService;
     }
 
+
     @GetMapping
-    public ResponseEntity<List<Jornada>> listarJornadas() {
-        return ResponseEntity.ok(jornadaService.listarJornadas());
+    public List<Jornada> listarJornadas() {
+        return jornadaService.listarJornadas();
     }
 
     @GetMapping("/{id}")
@@ -33,36 +35,35 @@ public class JornadaController {
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Jornada>> buscarPorUsuario(
-            @PathVariable Long usuarioId) {
+    public List<Jornada> buscarPorUsuario(@PathVariable UUID usuarioId) {
+        return jornadaService.buscarPorUsuario(usuarioId);
+    }
 
-        return ResponseEntity.ok(
-                jornadaService.buscarPorUsuario(usuarioId)
-        );
+
+    @GetMapping("/mias")
+    public List<Jornada> misJornadas(Authentication auth) {
+        return jornadaService.buscarPorUsuario(UUID.fromString(auth.getName()));
     }
 
     @PostMapping("/iniciar")
-    public ResponseEntity<Jornada> iniciarJornada(
-            @Valid @RequestBody IniciarJornadaRequest request) {
+    public ResponseEntity<Jornada> iniciarJornada(@Valid @RequestBody IniciarJornadaRequest request,
+                                                  Authentication auth) {
+        UUID idTrabajador = UUID.fromString(auth.getName());
 
         Jornada jornada = jornadaService.iniciarJornada(
-                request.usuarioId(),
+                idTrabajador,
                 request.latitud(),
-                request.longitud()
-        );
+                request.longitud());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(jornada);
     }
 
-    @PutMapping("/{id}/finalizar")
-    public ResponseEntity<Jornada> finalizarJornada(@PathVariable Long id) {
-        return ResponseEntity.ok(jornadaService.finalizarJornada(id));
+    @PutMapping("/finalizar")
+    public ResponseEntity<Jornada> finalizarJornada(Authentication auth) {
+        UUID idTrabajador = UUID.fromString(auth.getName());
+        return ResponseEntity.ok(jornadaService.finalizarJornadaActiva(idTrabajador));
     }
 
-    public record IniciarJornadaRequest(
-            @NotNull Long usuarioId,
-            Double latitud,
-            Double longitud
-    ) {
+    public record IniciarJornadaRequest(Double latitud, Double longitud) {
     }
 }

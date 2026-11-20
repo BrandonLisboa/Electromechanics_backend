@@ -1,81 +1,53 @@
 package com.electromechanics.usuario_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+import java.util.UUID;
 
+@Getter 
+@Setter
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
+    @Getter 
+    @Setter 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NotBlank
     @Column(nullable = false, unique = true)
     private String rut;
 
-    @NotBlank
-    @Column(nullable = false)
+    @JsonIgnore
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
     private String nombre;
 
-    @NotBlank
     @Email
-    @Column(nullable = false)
     private String correo;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String rol;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol", nullable = false)
+    private Rol rol = Rol.TRABAJADOR;
+
+    public Rol getRol() { return rol; }
+    
+    public void setRol(Rol rol) { this.rol = rol; }
 
     public Usuario() {
     }
 
-    public Usuario(String rut, String nombre, String correo, String rol) {
+    public Usuario(String rut, String passwordHash) {
         this.rut = rut;
-        this.nombre = nombre;
-        this.correo = correo;
-        this.rol = rol;
+        this.passwordHash = passwordHash;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getRut() {
-        return rut;
-    }
-
-    public void setRut(String rut) {
-        this.rut = rut;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getRol() {
-        return rol;
-    }
-
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
+    
 }
