@@ -2,9 +2,15 @@ package com.electromechanics.jornada_service.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
+@Getter 
+@Setter 
 @Table(name = "jornadas")
 public class Jornada {
 
@@ -13,8 +19,8 @@ public class Jornada {
     private Long id;
 
     @NotNull
-    @Column(nullable = false)
-    private Long usuarioId;
+    @Column(name = "usuario_id", nullable = false)
+    private UUID usuarioId;
 
     @NotNull
     @Column(nullable = false)
@@ -32,65 +38,10 @@ public class Jornada {
     public Jornada() {
     }
 
-    public Jornada(Long usuarioId, LocalDateTime inicio, String estado) {
+    public Jornada(UUID usuarioId, LocalDateTime inicio, String estado) {
         this.usuarioId = usuarioId;
         this.inicio = inicio;
         this.estado = estado;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUsuarioId() {
-        return usuarioId;
-    }
-
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
-    public LocalDateTime getInicio() {
-        return inicio;
-    }
-
-    public void setInicio(LocalDateTime inicio) {
-        this.inicio = inicio;
-    }
-
-    public LocalDateTime getFin() {
-        return fin;
-    }
-
-    public void setFin(LocalDateTime fin) {
-        this.fin = fin;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public Double getLatitud() {
-        return latitud;
-    }
-
-    public void setLatitud(Double latitud) {
-        this.latitud = latitud;
-    }
-
-    public Double getLongitud() {
-        return longitud;
-    }
-
-    public void setLongitud(Double longitud) {
-        this.longitud = longitud;
-    }
 }
