@@ -1,0 +1,51 @@
+PASOS
+
+1. Verificar Docker
+   docker --version
+   docker compose version
+
+2. Clonar el proyecto
+   git clone https://github.com/BrandonLisboa/Electromechanics_backend.git
+   cd Electromechanics_backend
+
+3. Crear el archivo .env
+   Copy-Item .env.example .env
+
+   Editarlo con valores propios:
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD="tu_contraseña"
+   POSTGRES_PORT=5433
+   JWT_SECRET=una_clave_propia_de_al_menos_32_caracteres
+
+4. Levantar todo
+   docker compose up --build -d
+   docker compose ps
+
+
+5. Verificar que responden (deben devolver 200)
+   Invoke-WebRequest -Uri http://localhost:8081/v3/api-docs -UseBasicParsing | Select-Object StatusCode
+   Invoke-WebRequest -Uri http://localhost:8082/v3/api-docs -UseBasicParsing | Select-Object StatusCode
+   Invoke-WebRequest -Uri http://localhost:8083/v3/api-docs -UseBasicParsing | Select-Object StatusCode
+
+6. Crear un supervisor (solo la primera vez por base nueva)
+   Registrar un usuario con POST /api/v1/usuarios/registro en
+   {"rut": "12-3", "password": "admin"}
+
+   Luego cambiar su rol:
+   docker exec -it em-postgres psql -U postgres -d electromechanics -c "UPDATE usuario.usuarios SET rol='SUPERVISOR' WHERE rut='12-3';"
+
+COMANDOS
+   docker compose ps                            ver estado
+   docker compose logs usuario-service          ver logs de un servicio
+   docker compose down                          detener sin borrar datos
+   docker compose up -d                         levantar de nuevo
+   docker compose up --build -d usuario-service reconstruir un servicio
+   docker compose down -v                       borrar todo, incluidos los datos
+
+PROBLEMAS COMUNES
+- "empty compose file": ejecutar desde la carpeta que contiene docker-compose.yml
+- "port is already allocated": cambiar POSTGRES_PORT en .env o cerrar el programa que usa el puerto
+- "password authentication failed": docker compose down -v y volver a levantar
+- Un servicio se reinicia en bucle: docker compose logs <servicio>
+- 401 con token válido: JWT_SECRET distinta entre servicios (todos leen el mismo .env)
+- Los schemas no existen: docker compose down -v y volver a levantar

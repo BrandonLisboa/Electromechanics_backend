@@ -1,0 +1,15 @@
+# Credenciales
+.env
+
+# Compilados de Maven (cada servicio)
+target/
+**/target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Sistema
+.DS_Store
+Thumbs.db
