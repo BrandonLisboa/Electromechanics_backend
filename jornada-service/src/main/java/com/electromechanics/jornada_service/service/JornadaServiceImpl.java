@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JornadaServiceImpl implements JornadaService {
@@ -28,33 +29,21 @@ public class JornadaServiceImpl implements JornadaService {
     }
 
     @Override
-    public List<Jornada> buscarPorUsuario(Long usuarioId) {
+    public List<Jornada> buscarPorUsuario(UUID usuarioId) {
         return jornadaRepository.findByUsuarioId(usuarioId);
     }
 
     @Override
-    public Jornada iniciarJornada(Long usuarioId, Double latitud, Double longitud) {
-
-        if (usuarioId == null) {
-            throw new IllegalArgumentException("El usuario es obligatorio");
-        }
-
+    public Jornada iniciarJornada(UUID usuarioId, Double latitud, Double longitud) {
         boolean jornadaActiva = jornadaRepository.findByUsuarioId(usuarioId)
                 .stream()
-                .anyMatch(jornada -> "EN_CURSO".equals(jornada.getEstado()));
+                .anyMatch(j -> "EN_CURSO".equals(j.getEstado()));
 
         if (jornadaActiva) {
-            throw new IllegalArgumentException(
-                    "El usuario ya tiene una jornada en curso"
-            );
+            throw new IllegalArgumentException("El usuario ya tiene una jornada en curso");
         }
 
-        Jornada jornada = new Jornada(
-                usuarioId,
-                LocalDateTime.now(),
-                "EN_CURSO"
-        );
-
+        Jornada jornada = new Jornada(usuarioId, LocalDateTime.now(), "EN_CURSO");
         jornada.setLatitud(latitud);
         jornada.setLongitud(longitud);
 
@@ -62,18 +51,9 @@ public class JornadaServiceImpl implements JornadaService {
     }
 
     @Override
-    public Jornada finalizarJornada(Long id) {
-
-        Jornada jornada = jornadaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Jornada no encontrada"
-                ));
-
-        if (!"EN_CURSO".equals(jornada.getEstado())) {
-            throw new IllegalArgumentException(
-                    "La jornada ya se encuentra finalizada"
-            );
-        }
+    public Jornada finalizarJornadaActiva(UUID usuarioId) {
+        Jornada jornada = jornadaRepository.findFirstByUsuarioIdAndEstado(usuarioId, "EN_CURSO")
+                .orElseThrow(() -> new IllegalArgumentException("No tienes una jornada en curso"));
 
         jornada.setFin(LocalDateTime.now());
         jornada.setEstado("FINALIZADA");

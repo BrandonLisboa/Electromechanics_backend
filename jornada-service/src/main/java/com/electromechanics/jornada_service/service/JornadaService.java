@@ -1,8 +1,10 @@
 package com.electromechanics.jornada_service.service;
 
 import com.electromechanics.jornada_service.model.Jornada;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface JornadaService {
 
@@ -10,10 +12,9 @@ public interface JornadaService {
 
     Optional<Jornada> buscarPorId(Long id);
 
-    List<Jornada> buscarPorUsuario(Long usuarioId);
+    List<Jornada> buscarPorUsuario(UUID usuarioId);
 
-    Jornada iniciarJornada(Long usuarioId, Double latitud, Double longitud);
+    Jornada iniciarJornada(UUID usuarioId, Double latitud, Double longitud);
 
-    Jornada finalizarJornada(Long id);
-
+    Jornada finalizarJornadaActiva(UUID usuarioId);
 }
